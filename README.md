@@ -1,18 +1,4 @@
-![Deco IDE](https://camo.githubusercontent.com/310b468e29288459ca36b1a54b3b311cf9e31bd4/68747470733a2f2f73332d75732d776573742d322e616d617a6f6e6177732e636f6d2f696d686f73742f4465636f4944454c6f676f25343032782e706e67)
-
-[![Build Status](https://travis-ci.org/decosoftware/deco-ide.svg?branch=master)](https://travis-ci.org/decosoftware/deco-ide) [![Bountysource](https://www.bountysource.com/badge/tracker?tracker_id=38081366)](https://www.bountysource.com/teams/decosoftware/issues?tracker_ids=38081366) [![Slack Status](http://decoslackin.herokuapp.com/badge.svg)](http://decoslackin.herokuapp.com/) 
-
-### The all-in-one solution for building React Native applications.
-
-You can get started right away on your React Native project by installing Deco and creating a new project — it's fast and there's no manual setup needed. File scaffolding handles your boilerplate. Ready-made components drop right into your code. Properties are graphically editable through the property inspector. It's an entirely new way to write, tweak, and re-use code.
-
-#### [Download Deco for Mac](https://www.decosoftware.com/download)
-
-![Deco Screenshot](http://i.imgur.com/KoZrWoF.png)
-
-#### [Documentation](https://www.decosoftware.com/docs) to get you started on Deco IDE.
-#### [Open an Issue](#opening-issues) for bug reports and feature requests.
-#### [Join Slack](https://decoslackin.herokuapp.com) to talk with us.
+# Edge Native IDE
 
 ## Table of Contents
 
@@ -66,8 +52,6 @@ $ npm install
 $ npm run copy-libs
 $ cd ../shared
 $ npm install
-$ cd ../desktop/libs/Scripts/sync-service
-$ npm install
 ```
 
 ### Development
@@ -119,27 +103,3 @@ $ npm run pack
 The resulting .pkg file will be output to `./dist/osx/Deco-$VERSION.pkg`
 
 This build is for local testing only. When you install, the system will generate a warning about this being from an unapproved developer — this is because the package is not signed when building locally.
-
-## Contributing
-
-### Opening Issues
-
-##### Issues are intended for bug reporting and feature requests.
-
-Before you open a new issue, make sure it isn't already in the list of [existing issues.](http://www.github.com/decosoftware/deco-ide/issues) If you believe you've found a new bug, it helps to include any relevant logs in your description.
-
-You can find the logs file at `~/Library/Application Support/com.decosoftware.Deco/logs.out`
-
-### Becoming a Contributor
-
-All information on how to become a contributor is in our [Contribution Guidelines.](CONTRIBUTING.md)
-
-## Feedback
-
-We :heart: feedback!
-
-##### Join the discussion in our [community chat.](https://decoslackin.herokuapp.com)
-
-## Copyright
-
-Copyright 2015 © Deco Software Inc - All rights reserved
