@@ -118,7 +118,7 @@ export const fetchModuleRegistry = (url) => {
 
     // Add to cache
     }).then((packageJSON) => {
-      RegistryCache.put(url, packageJSON)
+      // RegistryCache.put(url, packageJSON)
       return packageJSON
 
     // Failed to fetch... use staleValue if available
