@@ -131,8 +131,8 @@ export const fetchModuleRegistry = (url) => {
     }))
 
   }).then((packageJSON) => {
-    return _.get(packageJSON, 'deco.components', [])
+    return _.get(packageJSON, 'edge.components', [])
   })
 }
 
-export const DEFAULT_REGISTRY = "https://rawgit.com/decosoftware/deco-components/master/package.json"
+export const DEFAULT_REGISTRY = "https://rawgit.com/Codebrahma/edge-components/master/package.json"
