@@ -46,14 +46,20 @@ class Landing extends Component {
     return (
       <LandingPage
         recentProjects={recentProjects}
+        auth={this.props.auth}
         onOpen={(path) => {
           this.props.dispatch(openProject(path))
         }}
         onCreateNew={() => {
           this.props.dispatch(createProject())
-        }} />
+        }} 
+      />
     )
   }
 }
 
-export default connect()(Landing)
+const mapStateToProps = (state) => ({
+  auth: state.auth
+})
+
+export default connect(mapStateToProps)(Landing)

@@ -1,59 +1,31 @@
 import React from 'react'
 import GithubIcon from '../display/GithubIcon'
 
-
-const style = {
-  position: 'absolute',
-  width: '100%',
-  height: '100%',
-  backgroundColor: "#ffffff",
-  display: 'flex',
-  flexDirection: 'column',
-  WebkitAppRegion: 'drag',
-}
-
-const webview = {
-  height: 500
-}
-
-const button = {
-  display: 'flex',
-  width: 200,
-  padding: 10,
-  cursor: 'pointer',
-  backgroundColor: '#f1f1f1',
-  alignItems: 'center',
-  justifyContent: 'space-around'
-}
-
 const githubOptions = {
-  githubLoginUrl: "https://github.com/", //login/oauth/authorize?client_id=6d5bcbdda5b24161cfae&scope=repo",
+  url: "https://github.com/login/oauth/authorize?client_id=6d5bcbdda5b24161cfae&scope=repo&allow_signup=false",
   client_id: '6d5bcbdda5b24161cfae',
-  client_secret: 'bf39ebedd45660e137de57d40ed1280c87d1aad9',
-  scopes: ["repo"] // Scopes limit access for OAuth tokens.
+  client_secret: 'bf39ebedd45660e137de57d40ed1280c87d1aad9'
 };
 
 
 class GithubAuth extends React.Component {
   constructor(props){
     super(props)
+    this.authView = null
 
     this.state = {
-      authenticating: false,
-      isAuthenticated: false,
-      displayWebview: false
+      gettingToken: false
     }
+
   }
 
   componentDidMount(){
     this.authView.addEventListener('did-navigate', (e) => {
-      console.log(e)
       this.handleCallback(e.url);
     })
   }
 
   handleCallback(url){
-    cosnole.log(url)
     // Check if 'code' is there in the url
     var raw_code = /code=([^&]*)/.exec(url) || null;
     var code = (raw_code && raw_code.length > 1) ? raw_code[1] : null;
@@ -63,15 +35,15 @@ class GithubAuth extends React.Component {
       // Close the browser if code found or error
 
       this.setState({
-        displayWebview: false
+        gettingToken: true
       })
-
+      
     }
 
     // If there is a code, proceed to get token from github
     if (code) {
       console.log(code)
-      // this.requestGithubToken(code);
+      this.requestGithubToken(code);
     } else if (error) {
       alert('Oops! Something went wrong and we couldn\'t' +
         'log you in using Github. Please try again.');
@@ -80,7 +52,7 @@ class GithubAuth extends React.Component {
 
   requestGithubToken(code){
 
-    const option  = {
+    const options  = {
       headers: {
         'Accept': 'application/json'
       },
@@ -88,39 +60,33 @@ class GithubAuth extends React.Component {
       body: JSON.stringify({
         client_id: githubOptions.client_id,
         client_secret: githubOptions.client_secret,
-        code,
+        code
       })
     }
 
-
     fetch('https://github.com/login/oauth/access_token', options)
       .then(result => {
-        console.log(result.json())
+        console.log(result)
+      })
+      .catch(err => {
+        console.log('error', err)
       })
 
-  }
-
-  handleLoginClick(){
-    this.setState({ 
-      displayWebview: true,
-      authenticating: true 
-    }, () => {
-      this.authView.addEventListener('did-navigate', (e) => {
-        this.handleCallback(e.url);
-      })
-    })
   }
 
 
   render(){
-
     return(
-      <div className="vbox helvetica-smooth" style={style}>
-        <webview 
-          src={githubOptions.url}
-          style={webview}
-          ref={(elem) => this.authView = elem}
-        />
+      <div style={{ flex: 1 }}>
+        {this.state.gettingToken ? (
+          <p style={{ textAlign: 'center' }}>Fetching auth token...</p>
+        ) : (
+          <webview 
+            src={githubOptions.url}
+            style={{ height: 300 }}
+            ref={(elem) => this.authView = elem}
+          />
+        )}
       </div>
     )
   }

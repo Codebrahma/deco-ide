@@ -113,7 +113,6 @@ export const fetchModuleRegistry = (url) => {
       return result.json()
     })
     .then((packageJSON) => {
-      console.log(packageJSON)
       return _.get(packageJSON, 'edge.components', [])
     })
     .catch((err) => new Promise((resolve, reject) => {

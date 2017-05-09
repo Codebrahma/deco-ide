@@ -18,10 +18,11 @@
 import React, { Component, PropTypes } from 'react'
 import path from 'path'
 
-import DecoLogo from '../display/DecoLogo'
+import CBLogo from '../display/CBLogo'
 import NewIcon from '../display/NewIcon'
 import LandingButton from '../buttons/LandingButton'
 import ProjectListItem from '../buttons/ProjectListItem'
+import GithubAuth from '../pages/GithubAuth'
 
 const style = {
   position: 'absolute',
@@ -35,7 +36,7 @@ const style = {
 }
 
 const topStyle = {
-  flex: '1 1 auto',
+  flex: '1',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'stretch',
@@ -69,45 +70,59 @@ const logoWrapperStyle = {
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
+  fontSize: 25
 }
 
-const LandingPage = ({ onOpen, onCreateNew, recentProjects }) => {
+const loginWrapper = {
+  flex: 3
+}
+
+const LandingPage = ({ onOpen, onCreateNew, recentProjects, auth }) => {
   return (
     <div className='vbox helvetica-smooth' style={style}>
       <div style={topStyle}>
         <div style={logoWrapperStyle}>
-          <DecoLogo/>
+          <CBLogo /> Edge IDE
         </div>
-        <div style={projectListStyle}>
-          <div style={projectWrapperStyle}>
-            <ProjectListItem
-              onClick={onOpen.bind(null, null)}
-              title={'Open Project...'}
-            />
-            {_.map(recentProjects, (projectPath) => {
-              const base = path.basename(projectPath)
-              const dir = path.dirname(projectPath)
+      </div>
+      {auth.isAuth ? (
+        <div>
+          <div style={projectListStyle}>
+            <div style={projectWrapperStyle}>
+              <ProjectListItem
+                onClick={onOpen.bind(null, null)}
+                title={'Open Project...'}
+              />
+              {_.map(recentProjects, (projectPath) => {
+                const base = path.basename(projectPath)
+                const dir = path.dirname(projectPath)
 
-              return (
-                <ProjectListItem
-                  key={projectPath}
-                  onClick={onOpen.bind(null, projectPath)}
-                  title={base}
-                  path={dir}
-                />
-              )
-            })}
+                return (
+                  <ProjectListItem
+                    key={projectPath}
+                    onClick={onOpen.bind(null, projectPath)}
+                    title={base}
+                    path={dir}
+                  />
+                )
+              })}
+            </div>
+          </div>
+          <div style={bottomStyle}>
+            <LandingButton
+              id={'new-project'}
+              onClick={onCreateNew}
+            >
+              <NewIcon />
+              New Project
+            </LandingButton>
           </div>
         </div>
-      </div>
-      <div style={bottomStyle}>
-        <LandingButton
-          id={'new-project'}
-          onClick={onCreateNew}>
-          <NewIcon />
-          New Project
-        </LandingButton>
-      </div>
+      ) : (
+        <div style={loginWrapper}>
+          <GithubAuth />
+        </div>
+      )}
     </div>
   )
 }

@@ -29,6 +29,7 @@ import components from './componentReducer'
 import user from './userReducer'
 import ast from './astReducer'
 import elementTree from './elementTreeReducer'
+import auth from './authReducer'
 
 const rootReducer = combineReducers({
   directory: fileReducer,
@@ -44,6 +45,7 @@ const rootReducer = combineReducers({
   user,
   ast,
   elementTree,
+  auth
 })
 
 export default rootReducer
