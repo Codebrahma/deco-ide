@@ -1,28 +1,48 @@
 import React from 'react'
 import GithubIcon from '../display/GithubIcon'
 
-const githubOptions = {
-  url: "https://github.com/login/oauth/authorize?client_id=6d5bcbdda5b24161cfae&scope=repo&allow_signup=false",
+const BrowserWindow = Electron.remote.BrowserWindow
+
+const options = {
   client_id: '6d5bcbdda5b24161cfae',
-  client_secret: 'bf39ebedd45660e137de57d40ed1280c87d1aad9'
+  client_secret: 'bf39ebedd45660e137de57d40ed1280c87d1aad9',
+  scopes: ["user", "repo"]
 };
 
 
 class GithubAuth extends React.Component {
   constructor(props){
     super(props)
-    this.authView = null
 
     this.state = {
       gettingToken: false
     }
 
+    this.authWindow = null
+
   }
 
   componentDidMount(){
-    this.authView.addEventListener('did-navigate', (e) => {
-      this.handleCallback(e.url);
-    })
+
+    this.authWindow = new BrowserWindow({ width: 800, height: 600, show: false, 'node-integration': false });
+    const githubUrl = 'https://github.com/login/oauth/authorize?';
+    var authUrl = githubUrl + 'client_id=' + options.client_id + '&scope=' + options.scopes;
+    this.authWindow.loadURL(authUrl);
+    this.authWindow.show();
+
+
+    this.authWindow.webContents.on('will-navigate', ({url}) => {
+      this.handleCallback(url);
+    });
+
+    this.authWindow.webContents.on('did-get-redirect-request', ({url}) => {
+      this.handleCallback(url);
+    });
+
+    this.authWindow.on('close', () => {
+      this.authWindow = null;
+    }, false);
+
   }
 
   handleCallback(url){
@@ -38,6 +58,8 @@ class GithubAuth extends React.Component {
         gettingToken: true
       })
       
+      this.authWindow.destroy()
+
     }
 
     // If there is a code, proceed to get token from github
@@ -58,8 +80,8 @@ class GithubAuth extends React.Component {
       },
       method: "POST",
       body: JSON.stringify({
-        client_id: githubOptions.client_id,
-        client_secret: githubOptions.client_secret,
+        client_id: options.client_id,
+        client_secret: options.client_secret,
         code
       })
     }
@@ -78,15 +100,7 @@ class GithubAuth extends React.Component {
   render(){
     return(
       <div style={{ flex: 1 }}>
-        {this.state.gettingToken ? (
-          <p style={{ textAlign: 'center' }}>Fetching auth token...</p>
-        ) : (
-          <webview 
-            src={githubOptions.url}
-            style={{ height: 300 }}
-            ref={(elem) => this.authView = elem}
-          />
-        )}
+        <p style={{ textAlign: 'center' }}>Fetching auth token...</p>
       </div>
     )
   }

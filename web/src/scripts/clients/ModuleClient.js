@@ -121,7 +121,6 @@ export const fetchModuleRegistry = (url) => {
     .catch((err) => new Promise((resolve, reject) => {
       reject(err)
       console.log(err)
-      
     }))
 }
 
