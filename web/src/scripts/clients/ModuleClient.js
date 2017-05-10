@@ -85,7 +85,7 @@ export const fetchTemplateAndImportDependencies = (deps, textUrl, metadataUrl, p
       fetchTemplateMetadata(metadataUrl),
     ]).then(([text, metadata]) => {
 
-      TemplateCache.put(textUrl, metadataUrl, text, metadata)
+      // TemplateCache.put(textUrl, metadataUrl, text, metadata)
 
       return {
         text,
@@ -94,20 +94,23 @@ export const fetchTemplateAndImportDependencies = (deps, textUrl, metadataUrl, p
     })
   }
 
-  // Always fetch local files
-  if (FetchUtils.isLocal(textUrl)) {
-    return performFetch()
+  return performFetch()
 
-  // Return result from cache, or fetch on failure
-  } else {
-    return TemplateCache.get(textUrl, metadataUrl).then(({text, metadata}) => {
-      return {text, metadata}
-    }).catch(performFetch)
-  }
+  // Always fetch local files
+  // if (FetchUtils.isLocal(textUrl)) {
+  //   return performFetch()
+
+  // // Return result from cache, or fetch on failure
+  // } else {
+  //   return TemplateCache.get(textUrl, metadataUrl).then(({text, metadata}) => {
+  //     return {text, metadata}
+  //   }).catch(performFetch)
+  // }
 
 }
 
 export const fetchModuleRegistry = (url) => {
+
   return fetch(url)
     .then((result) => {
       return result.json()
@@ -117,6 +120,8 @@ export const fetchModuleRegistry = (url) => {
     })
     .catch((err) => new Promise((resolve, reject) => {
       reject(err)
+      console.log(err)
+      
     }))
 }
 

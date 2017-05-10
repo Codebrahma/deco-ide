@@ -18,7 +18,7 @@
 import React, { Component, PropTypes } from 'react'
 import path from 'path'
 
-import CBLogo from '../display/CBLogo'
+import EdgeLogo from '../display/EdgeLogo'
 import NewIcon from '../display/NewIcon'
 import LandingButton from '../buttons/LandingButton'
 import ProjectListItem from '../buttons/ProjectListItem'
@@ -82,7 +82,7 @@ const LandingPage = ({ onOpen, onCreateNew, recentProjects, auth }) => {
     <div className='vbox helvetica-smooth' style={style}>
       <div style={topStyle}>
         <div style={logoWrapperStyle}>
-          <CBLogo /> Edge IDE
+          <EdgeLogo/>
         </div>
       </div>
       {auth.isAuth ? (
