@@ -374,7 +374,12 @@ const TemplateBuilder = function(platform) {
       click: function() {
         bridge.send(toggleTerm())
       }
-    }, ]
+    },{
+      label: 'Reload App',
+      click: function(item, browserWindow){
+        browserWindow.webContents.reload()
+      }
+    } ]
   }
 
   //TURN ON DEVELOPER TOOLS WHEN IN DEV MODE
