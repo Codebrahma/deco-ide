@@ -1,6 +1,7 @@
 import React from 'react'
 import GithubIcon from '../display/GithubIcon'
-
+var querystring = require('querystring');
+var https = require("https");
 const BrowserWindow = Electron.remote.BrowserWindow
 
 const options = {
@@ -15,7 +16,7 @@ class GithubAuth extends React.Component {
     super(props)
 
     this.state = {
-      gettingToken: false
+      status: 'Checking auth'
     }
 
     this.authWindow = null
@@ -24,19 +25,29 @@ class GithubAuth extends React.Component {
 
   componentDidMount(){
 
-    this.authWindow = new BrowserWindow({ width: 800, height: 600, show: false, 'node-integration': false });
+    this.authWindow = new BrowserWindow({ 
+      width: 500, 
+      height: 500, 
+      show: false,
+      modal: true,
+      'node-integration': false 
+    });
     const githubUrl = 'https://github.com/login/oauth/authorize?';
     var authUrl = githubUrl + 'client_id=' + options.client_id + '&scope=' + options.scopes;
     this.authWindow.loadURL(authUrl);
     this.authWindow.show();
+    
+    this.setState({
+      status: 'Waiting for Authorization'
+    })
 
 
-    this.authWindow.webContents.on('will-navigate', ({url}) => {
-      this.handleCallback(url);
+    this.authWindow.webContents.on('will-navigate', (e) => {
+      this.handleCallback(e.url);
     });
 
-    this.authWindow.webContents.on('did-get-redirect-request', ({url}) => {
-      this.handleCallback(url);
+    this.authWindow.webContents.on('did-get-redirect-request', (e, oldUrl, newURL) => {
+      this.handleCallback(newURL);
     });
 
     this.authWindow.on('close', () => {
@@ -53,13 +64,7 @@ class GithubAuth extends React.Component {
 
     if (code || error) {
       // Close the browser if code found or error
-
-      this.setState({
-        gettingToken: true
-      })
-      
       this.authWindow.destroy()
-
     }
 
     // If there is a code, proceed to get token from github
@@ -74,25 +79,51 @@ class GithubAuth extends React.Component {
 
   requestGithubToken(code){
 
-    const options  = {
-      headers: {
-        'Accept': 'application/json'
-      },
-      method: "POST",
-      body: JSON.stringify({
-        client_id: options.client_id,
-        client_secret: options.client_secret,
-        code
-      })
-    }
+    this.setState({
+      status: 'Getting Access Token'
+    })
 
-    fetch('https://github.com/login/oauth/access_token', options)
-      .then(result => {
-        console.log(result)
-      })
-      .catch(err => {
-        console.log('error', err)
-      })
+    var postData = querystring.stringify({
+      "client_id" : options.client_id,
+      "client_secret" : options.client_secret,
+      "code" : code
+    });
+      
+    var post = {
+      host: "github.com",
+      path: "/login/oauth/access_token",
+      method: "POST",
+      headers: 
+        { 
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': postData.length,
+            "Accept": "application/json"
+        }
+    };
+
+
+    var req = https.request(post, function(response){
+      var result = '';
+      response.on('data', function(data) {
+        result = result + data;
+      });
+      response.on('end', function () {
+            var json = JSON.parse(result.toString());
+            console.log("access token recieved: " + json.access_token);
+            if (response && response.ok) {
+                // Success - Received Token.
+                // Store it in localStorage maybe?
+                console.log(response.body.access_token);
+            }
+        });
+      response.on('error', function (err) {
+            console.log("GITHUB OAUTH REQUEST ERROR: " + err.message);
+        });
+    });
+    
+    req.write(postData);
+    req.end();
+
 
   }
 
@@ -100,7 +131,7 @@ class GithubAuth extends React.Component {
   render(){
     return(
       <div style={{ flex: 1 }}>
-        <p style={{ textAlign: 'center' }}>Fetching auth token...</p>
+        <p style={{ textAlign: 'center' }}>{this.state.status}</p>
       </div>
     )
   }

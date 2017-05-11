@@ -52,6 +52,7 @@
     "semver": "^5.1.0",
     "sklad": "^4.1.1",
     "style-loader": "^0.8.3",
+    "superagent": "^3.5.2",
     "url-loader": "^0.5.7",
     "uuid": "^2.0.1",
     "webpack": "^1.12.2",
