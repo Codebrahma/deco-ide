@@ -18,6 +18,7 @@
 "use strict"
 //ELECTRON REQUIRES
 var Electron = require('electron')
+var OauthGithub = require('electron-oauth-github');
 
 var app = Electron.app
 var _ = require('lodash')
@@ -54,6 +55,20 @@ app.on('window-all-closed', function() {
     app.quit()
   }
 })
+
+const github = new OauthGithub({
+  id: '6d5bcbdda5b24161cfae',
+  secret: 'bf39ebedd45660e137de57d40ed1280c87d1aad9',
+  scopes: ['user:email', 'repo'],
+});
+ 
+github.startRequest(function(access_token, err) {
+  if (err) {
+    return console.error(err);
+  }
+ 
+  console.log('token = ', access_token);
+});
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
