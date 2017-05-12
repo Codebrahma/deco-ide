@@ -351,6 +351,11 @@ const TemplateBuilder = function(platform) {
   this.viewMenu = {
     label: 'View',
     submenu: [{
+      label: 'Reload Window',
+      click: function(item, browserWindow){
+        browserWindow.webContents.reload()
+      }
+    }, {
       label: 'Toggle Full Screen',
       accelerator: (function() {
         if (process.platform == 'darwin')
@@ -374,12 +379,7 @@ const TemplateBuilder = function(platform) {
       click: function() {
         bridge.send(toggleTerm())
       }
-    },{
-      label: 'Reload App',
-      click: function(item, browserWindow){
-        browserWindow.webContents.reload()
-      }
-    } ]
+    }]
   }
 
   //TURN ON DEVELOPER TOOLS WHEN IN DEV MODE
