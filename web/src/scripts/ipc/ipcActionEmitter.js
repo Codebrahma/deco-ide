@@ -50,6 +50,10 @@ import {
 
 import { tabActions } from '../actions'
 
+import {
+  githubLoginSuccess
+} from '../actions/loginActions'
+
 import AcceleratorConstants from 'shared/constants/ipc/AcceleratorConstants'
 const {
   SHOULD_CREATE_NEW_PROJECT,
@@ -95,6 +99,12 @@ const {
   PROGRESS_END,
   UPGRADE_STATUS,
 } = UIConstants
+
+import GithubConsts from 'shared/constants/ipc/GithubConstants'
+const {
+  GITHUB_AUTH_SUCCESS,
+  GITHUB_AUTH_FAILURE
+} = GithubConsts
 
 import { ProcessStatus } from '../constants/ProcessStatus'
 
@@ -212,6 +222,11 @@ const ipcActionEmitter = (store) => {
   ipc.on(UPGRADE_STATUS, (evt, obj) => {
     const {status} = obj.payload
     store.dispatch(upgradeStatus(status))
+  })
+
+  ipc.on(GITHUB_AUTH_SUCCESS, (evt, obj) => {
+    const { accessToken } = obj
+    store.dispatch(githubLoginSuccess(accessToken))
   })
 }
 

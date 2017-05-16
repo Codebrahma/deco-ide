@@ -17,3 +17,10 @@ export function githubLoginRequest() {
     request(_githubLoginRequest())
   }
 }
+
+export function githubLoginSuccess(accessToken){
+  return {
+    type: GITHUB_AUTH_SUCCESS,
+    accessToken
+  }
+}

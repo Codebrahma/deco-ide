@@ -1,10 +1,11 @@
 'use strict'
 import OauthGithub from 'electron-oauth-github'
-import GithubConsts from 'shared/constants/ipc/GithubConstants'
 import { dialog, BrowserWindow } from 'electron'
+import request from 'superagent'
+import GithubConsts from 'shared/constants/ipc/GithubConstants'
 import bridge from '../bridge'
 import Logger from '../log/logger'
-import request from 'superagent'
+import { githubAuthSuccess } from '../actions/githubActions'
 
 const { 
   GITHUB_AUTH_REQUESTED,
@@ -50,7 +51,7 @@ class GithubHandler {
         this.handleCallback(event.url);
       });
 
-      this.authWindow.webContents.on('did-get-redirect-request',(event, oldUrl, newUrl) => {
+      this.authWindow.webContents.on('did-get-redirect-request', (event, oldUrl, newUrl) => {
         this.handleCallback(newUrl);
       });
 
@@ -58,6 +59,8 @@ class GithubHandler {
       this.authWindow.on('close', () => {
           this.authWindow = null;
       }, false);
+
+      // bridge.send(githubAuthSuccess('test'))
 
     }catch(err){
       Logger.error(err)
@@ -104,10 +107,9 @@ class GithubHandler {
           code
         })
         .then((res) => {
-          bridge.send({
-            type: GITHUB_AUTH_SUCCESS,
-            accessToken: res.body.access_token
-          })
+          bridge.send(githubAuthSuccess(res.body.access_token))
+          // console.log(res.body.access_token)
+          // respond()
         })
         .catch(err => {
           Logger.error(err)
