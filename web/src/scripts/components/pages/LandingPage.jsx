@@ -77,7 +77,7 @@ const loginWrapper = {
   flex: 3
 }
 
-const LandingPage = ({ onOpen, onCreateNew, recentProjects, auth }) => {
+const LandingPage = ({ onOpen, onCreateNew, recentProjects, auth, loginRequest }) => {
   return (
     <div className='vbox helvetica-smooth' style={style}>
       <div style={topStyle}>
@@ -120,7 +120,7 @@ const LandingPage = ({ onOpen, onCreateNew, recentProjects, auth }) => {
         </div>
       ) : (
         <div style={loginWrapper}>
-          <GithubAuth />
+          <GithubAuth onLoginRequested={() => loginRequest()}  />
         </div>
       )}
     </div>

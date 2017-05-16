@@ -1,14 +1,19 @@
-export const GITHUB_LOGIN_REQUEST = 'GITHUB_LOGIN_REQUEST'
-export const GITHUB_LOGIN_SUCCESS = 'GITHUB_LOGIN_SUCCESS'
-export const GITHUB_LOGIN_FAILURE = 'GITHUB_LOGIN_FAILURE'
+import { 
+  GITHUB_AUTH_REQUESTED, 
+  GITHUB_AUTH_SUCCESS, 
+  GITHUB_AUTH_FAILURE 
+} from 'shared/constants/ipc/GithubConstants'
+import request from '../ipc/Request'
 
 
-
-export const performGithubLogin = () => {
-
-
+function _githubLoginRequest(){
   return {
-    type: GITHUB_LOGIN_REQUEST,
-    
+    type: GITHUB_AUTH_REQUESTED, 
+  }
+}
+
+export function githubLoginRequest() {
+  return function(dispatch) {
+    request(_githubLoginRequest())
   }
 }

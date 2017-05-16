@@ -20,6 +20,7 @@ import { routeActions, } from 'react-router-redux'
 import { connect } from 'react-redux'
 
 import { createProject, openProject, } from '../actions/applicationActions'
+import { githubLoginRequest } from '../actions/loginActions'
 import { resizeWindow, } from '../actions/uiActions'
 import RecentProjectUtils from '../utils/RecentProjectUtils'
 
@@ -52,6 +53,9 @@ class Landing extends Component {
         }}
         onCreateNew={() => {
           this.props.dispatch(createProject())
+        }}
+        loginRequest={() => {
+          this.props.dispatch(githubLoginRequest())
         }} 
       />
     )

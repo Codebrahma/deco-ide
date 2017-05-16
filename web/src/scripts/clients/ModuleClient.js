@@ -124,4 +124,4 @@ export const fetchModuleRegistry = (url) => {
     }))
 }
 
-export const DEFAULT_REGISTRY = "https://rawgit.com/Codebrahma/edge-components/master/package.json"
+export const DEFAULT_REGISTRY = "https://rawgit.com/Codebrahma/edge-meta/master/package.json"
