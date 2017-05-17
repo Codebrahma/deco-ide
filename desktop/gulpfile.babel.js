@@ -276,14 +276,14 @@ gulp.task('create-project-template', function(callback) {
   }
 
   // Remove existing Project and compressed modules
-  es(`rm -rf ${pp.project}`)
-  es(`rm -rf ${pp.compressed_modules}`)
+  // es(`rm -rf ${pp.project}`)
+  // es(`rm -rf ${pp.compressed_modules}`)
 
   // Update to latest react-native-cli
-  es(`npm install -g react-native-cli`)
+  // es(`npm install -g react-native-cli`)
 
   // Create Project
-  es(`react-native init Project`, {cwd: pp.libs})
+  // es(`react-native init Project`, {cwd: pp.libs})
 
   // Build iOS binary
   es(`react-native run-ios --simulator "iPhone 6"`, {cwd: pp.project})
