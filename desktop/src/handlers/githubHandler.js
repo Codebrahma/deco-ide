@@ -1,11 +1,11 @@
 'use strict'
-import OauthGithub from 'electron-oauth-github'
 import { dialog, BrowserWindow } from 'electron'
 import request from 'superagent'
 import GithubConsts from 'shared/constants/ipc/GithubConstants'
 import bridge from '../bridge'
 import Logger from '../log/logger'
 import { githubAuthSuccess } from '../actions/githubActions'
+import Store from '../Utils/Store'
 
 const { 
   GITHUB_AUTH_REQUESTED,
@@ -24,13 +24,37 @@ class GithubHandler {
 
   constructor(){
     this.authWindow = null
+
+    this.store = new Store({
+      configName: 'github',
+      defaults: {
+        token: null
+      }
+    });
+
   }
 
   register(){
-    bridge.on(GITHUB_AUTH_REQUESTED, this.perfromLogin.bind(this))
+    bridge.on(GITHUB_AUTH_REQUESTED, this.checkLogin.bind(this))
   }
 
-  perfromLogin(payload, respond){
+  checkLogin(){
+    try{
+      let githubToken = this.store.get('token')
+      console.log(githubToken)
+      if(githubToken){
+        console.log('token found')
+        bridge.send(githubAuthSuccess(githubToken))
+      }else{
+        this.perfromLogin()
+      }
+    }catch(err){
+      console.log(err)
+    }
+      
+  }
+
+  perfromLogin(){
     try{
       
       // Set up the auth window
@@ -60,7 +84,6 @@ class GithubHandler {
           this.authWindow = null;
       }, false);
 
-      // bridge.send(githubAuthSuccess('test'))
 
     }catch(err){
       Logger.error(err)
@@ -107,9 +130,9 @@ class GithubHandler {
           code
         })
         .then((res) => {
-          bridge.send(githubAuthSuccess(res.body.access_token))
-          // console.log(res.body.access_token)
-          // respond()
+          let token = res.body.access_token
+          this.store.set('token', token)
+          bridge.send(githubAuthSuccess(token))
         })
         .catch(err => {
           Logger.error(err)
