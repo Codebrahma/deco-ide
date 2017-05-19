@@ -1,6 +1,6 @@
-'use strict'
 import { dialog, BrowserWindow } from 'electron'
 import request from 'superagent'
+import fs from 'fs'
 import GithubConsts from 'shared/constants/ipc/GithubConstants'
 import MetaComponentConsts from 'shared/constants/ipc/MetaComponentConstants'
 import bridge from '../bridge'
@@ -14,8 +14,12 @@ const {
 } = GithubConsts
 
 const {
-  MC_LIST_REQUEST
+  MC_LIST_REQUEST,
+  MC_INSTALL_COMPONENT
 } = MetaComponentConsts
+
+import { TEMP_PROJECT_FOLDER } from '../constants/DecoPaths'
+import { writeFile } from '../fs/safeWriter'
 
 
 const options = {
@@ -44,6 +48,7 @@ class GithubHandler {
   register(){
     bridge.on(GITHUB_AUTH_REQUESTED, this.githubAuthCheck.bind(this))
     bridge.on(MC_LIST_REQUEST, this.fetchComponentList.bind(this))
+    bridge.on(MC_INSTALL_COMPONENT, this.installMetaComponent.bind(this))
   }
 
   githubAuthCheck(){
@@ -183,6 +188,33 @@ class GithubHandler {
     }catch(err){
       bridge.send(componentListFailure(err))      
       console.log('request error: ', err)
+    }
+
+  }
+
+  installMetaComponent(payload, respond){
+    try{
+      payload.component.modules.forEach(module => {
+        fs.mkdirSync(`${TEMP_PROJECT_FOLDER}/modules/${module}`)
+        request
+          .get(`https://api.github.com/repos/Codebrahma/edge-meta/contents/modules${module}`)
+          .set('Authorization', `token ${this.token}`)
+          .query({ref: 'new-structure'})
+          .end((err, res) => {
+            if(err){
+              console.error(err)
+            }else{
+              const files = res.body
+              files.forEach(file => {
+                // Base64.decode(encodedString);
+                fs.writeFileSync(`${TEMP_PROJECT_FOLDER}/${file.path}`, "test")
+              })
+            }
+          })
+          
+      })
+    }catch (err) {
+      console.error(err)
     }
   }
 

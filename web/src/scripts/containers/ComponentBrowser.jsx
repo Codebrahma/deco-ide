@@ -17,13 +17,12 @@
 
 import React, { Component, PropTypes, } from 'react'
 import { connect } from 'react-redux'
-import { createSelector } from 'reselect'
 
-import * as selectors from '../selectors'
-import PaneHeader from '../components/headers/PaneHeader'
-import { ComponentMenuItem } from '../components'
-import { CATEGORIES, PREFERENCES } from 'shared/constants/PreferencesConstants'
-import { fetchMetaComponentList } from '../actions/metaComponentsActions'
+import ComponentList from '../components/menu/ComponentList'
+import { 
+  fetchMetaComponentList, 
+  installComponent 
+} from '../actions/metaComponentsActions'
 
 const styles = {
   main: {
@@ -32,16 +31,8 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'stretch',
     overflow: 'hidden',
-  },
+  }
 }
-
-const mapStateToProps = (state) => ({
-  components: state.components
-})
-
-const mapDispatchToProps = (dispatch) => ({
-  fetchComponentList: () => {dispatch(fetchMetaComponentList())}
-})
 
 class ComponentBrowser extends Component {
 
@@ -50,16 +41,24 @@ class ComponentBrowser extends Component {
   }
 
   render() {
-
-    console.log(this.props.components)
-    // const {componentList, style, onSelectItem, onClickItem, onDoubleClickItem, onContextMenuItem} = this.props
-
     return (
       <div style={styles.main}>
-        <p>Components</p>
+        <ComponentList 
+          components={this.props.components}
+          onInstallClicked={(component) => this.props.installComponent(component)}
+        />
       </div>
     )
   }
 }
+
+const mapStateToProps = (state) => ({
+  components: state.components
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  fetchComponentList: () => {dispatch(fetchMetaComponentList())},
+  installComponent: (component) => {dispatch(installComponent(component))}
+})
 
 export default connect(mapStateToProps, mapDispatchToProps)(ComponentBrowser)
