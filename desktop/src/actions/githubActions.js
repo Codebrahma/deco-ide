@@ -1,5 +1,3 @@
-const Logger = require('../log/logger')
-
 import GithubConstants from 'shared/constants/ipc/GithubConstants'
 const {
   GITHUB_AUTH_REQUESTED,

@@ -21,8 +21,9 @@ import { createSelector } from 'reselect'
 
 import * as selectors from '../selectors'
 import PaneHeader from '../components/headers/PaneHeader'
-import { FilterableList, DraggableComponentMenuItem } from '../components'
+import { ComponentMenuItem } from '../components'
 import { CATEGORIES, PREFERENCES } from 'shared/constants/PreferencesConstants'
+import { fetchMetaComponentList } from '../actions/metaComponentsActions'
 
 const styles = {
   main: {
@@ -34,31 +35,31 @@ const styles = {
   },
 }
 
-const mapStateToProps = (state) => createSelector(
-  selectors.componentList,
-  (componentList) => ({
-    componentList,
-  })
-)
+const mapStateToProps = (state) => ({
+  components: state.components
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  fetchComponentList: () => {dispatch(fetchMetaComponentList())}
+})
 
 class ComponentBrowser extends Component {
+
+  componentDidMount(){
+    this.props.fetchComponentList()
+  }
+
   render() {
-    const {componentList, style, onSelectItem, onClickItem, onDoubleClickItem, onContextMenuItem} = this.props
+
+    console.log(this.props.components)
+    // const {componentList, style, onSelectItem, onClickItem, onDoubleClickItem, onContextMenuItem} = this.props
 
     return (
       <div style={styles.main}>
-        <FilterableList
-          ItemComponent={DraggableComponentMenuItem}
-          items={componentList}
-          onClickItem={onClickItem}
-          onSelectItem={onSelectItem}
-          onDoubleClickItem={onDoubleClickItem}
-          onContextMenuItem={onContextMenuItem}
-          autoSelectFirst={false}
-        />
+        <p>Components</p>
       </div>
     )
   }
 }
 
-export default connect(mapStateToProps)(ComponentBrowser)
+export default connect(mapStateToProps, mapDispatchToProps)(ComponentBrowser)

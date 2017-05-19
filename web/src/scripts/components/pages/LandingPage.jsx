@@ -88,7 +88,6 @@ const loginWrapper = {
 }
 
 const LandingPage = ({ onOpen, onCreateNew, recentProjects, auth, loginRequest }) => {
-  console.log(auth)
   return (
     <div className='vbox helvetica-smooth' style={style}>
       <div style={header}>

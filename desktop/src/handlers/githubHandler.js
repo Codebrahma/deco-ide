@@ -2,19 +2,24 @@
 import { dialog, BrowserWindow } from 'electron'
 import request from 'superagent'
 import GithubConsts from 'shared/constants/ipc/GithubConstants'
+import MetaComponentConsts from 'shared/constants/ipc/MetaComponentConstants'
 import bridge from '../bridge'
 import Logger from '../log/logger'
 import { githubAuthSuccess, githubAuthFailure } from '../actions/githubActions'
+import { componentListSuccess, componentListFailure } from '../actions/metaComponentActions'
 import Store from '../Utils/Store'
 
 const { 
   GITHUB_AUTH_REQUESTED,
-  GITHUB_AUTH_SUCCESS,
-  GITHUB_AUTH_FAILURE 
 } = GithubConsts
+
+const {
+  MC_LIST_REQUEST
+} = MetaComponentConsts
 
 
 const options = {
+  root: 'https://api.github.com',
   client_id: '6d5bcbdda5b24161cfae',
   client_secret: 'bf39ebedd45660e137de57d40ed1280c87d1aad9',
   scopes: ["user", "repo"]
@@ -32,10 +37,13 @@ class GithubHandler {
       }
     });
 
+    this.token = null
+
   }
 
   register(){
     bridge.on(GITHUB_AUTH_REQUESTED, this.githubAuthCheck.bind(this))
+    bridge.on(MC_LIST_REQUEST, this.fetchComponentList.bind(this))
   }
 
   githubAuthCheck(){
@@ -150,12 +158,35 @@ class GithubHandler {
             this.store.remove('token')
           }else{
             bridge.send(githubAuthSuccess(token, res.body))
+            this.token = token
           }
         })
     }catch(err){
       bridge.send(githubAuthFailure(err))
     }
   }
+
+  fetchComponentList(){
+    try{
+      request
+        .get(`https://raw.githubusercontent.com/Codebrahma/edge-meta/new-structure/index.json`)
+        .set('Authorization', `token ${this.token}`)
+        .end((err, res) => {
+          if(err){
+            bridge.send(componentListFailure(err))
+            console.log('request error: ', err)
+          }else{
+            const json = JSON.parse(res.text)
+            bridge.send(componentListSuccess(json.modules))
+          }
+        })
+    }catch(err){
+      bridge.send(componentListFailure(err))      
+      console.log('request error: ', err)
+    }
+  }
+
+
 
 
 }
