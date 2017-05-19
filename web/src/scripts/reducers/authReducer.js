@@ -9,9 +9,10 @@ const {
 
 const initialState = {
   isAuth: false,
-  authenticating: false,
+  isLoading: false,
   accessToken: null,
-  error: null
+  error: null,
+  user: null
 }
 
 
@@ -19,7 +20,8 @@ const authReducer = (state = initialState, action) => {
   switch(action.type){
     case GITHUB_AUTH_REQUESTED: {
       return Object.assign({}, state, {
-        authenticating: true
+        isLoading: true,
+        error: null
       })
     }
       
@@ -27,14 +29,17 @@ const authReducer = (state = initialState, action) => {
       return Object.assign({}, state, {
         isAuth: true,
         accessToken: action.accessToken,
-        error: null
+        user: action.user,
+        error: null,
+        isLoading: false
       })
     }
     
     case GITHUB_AUTH_FAILURE: {
       return Object.assign({}, state, {
         isAuth: false,
-        error: action.error
+        error: action.error,
+        isLoading: false 
       })
     }
     default:

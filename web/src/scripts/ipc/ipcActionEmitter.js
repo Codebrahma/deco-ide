@@ -51,7 +51,8 @@ import {
 import { tabActions } from '../actions'
 
 import {
-  githubLoginSuccess
+  githubLoginSuccess,
+  githubLoginFailure
 } from '../actions/loginActions'
 
 import AcceleratorConstants from 'shared/constants/ipc/AcceleratorConstants'
@@ -225,8 +226,13 @@ const ipcActionEmitter = (store) => {
   })
 
   ipc.on(GITHUB_AUTH_SUCCESS, (evt, obj) => {
-    const { accessToken } = obj
-    store.dispatch(githubLoginSuccess(accessToken))
+    const { accessToken, user } = obj
+    store.dispatch(githubLoginSuccess(accessToken, user))
+  })
+
+  ipc.on(GITHUB_AUTH_FAILURE, (evt, obj) => {
+    const { error } = obj
+    store.dispatch(githubLoginFailure(error))
   })
 }
 

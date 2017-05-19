@@ -41,6 +41,15 @@ class Store {
     }
     
   }
+
+  remove(key){
+    try{
+      delete this.data[key];
+      fs.writeFileSync(this.path, JSON.stringify(this.data))
+    }catch(err){
+      console.error(err)
+    }
+  }
 }
 
 export default Store

@@ -18,9 +18,17 @@ export function githubLoginRequest() {
   }
 }
 
-export function githubLoginSuccess(accessToken){
+export function githubLoginSuccess(accessToken, user){
   return {
     type: GITHUB_AUTH_SUCCESS,
-    accessToken
+    accessToken,
+    user
+  }
+}
+
+export function githubLoginFailure(error){
+  return {
+    type: GITHUB_AUTH_FAILURE,
+    error
   }
 }

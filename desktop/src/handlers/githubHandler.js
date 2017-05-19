@@ -4,7 +4,7 @@ import request from 'superagent'
 import GithubConsts from 'shared/constants/ipc/GithubConstants'
 import bridge from '../bridge'
 import Logger from '../log/logger'
-import { githubAuthSuccess } from '../actions/githubActions'
+import { githubAuthSuccess, githubAuthFailure } from '../actions/githubActions'
 import Store from '../Utils/Store'
 
 const { 
@@ -35,23 +35,20 @@ class GithubHandler {
   }
 
   register(){
-    bridge.on(GITHUB_AUTH_REQUESTED, this.checkLogin.bind(this))
+    bridge.on(GITHUB_AUTH_REQUESTED, this.githubAuthCheck.bind(this))
   }
 
-  checkLogin(){
+  githubAuthCheck(){
     try{
       let githubToken = this.store.get('token')
-      console.log(githubToken)
       if(githubToken){
-        console.log('token found')
-        bridge.send(githubAuthSuccess(githubToken))
+        this.testToken(githubToken)
       }else{
         this.perfromLogin()
       }
     }catch(err){
-      console.log(err)
+      bridge.send(githubAuthFailure(err))
     }
-      
   }
 
   perfromLogin(){
@@ -81,7 +78,7 @@ class GithubHandler {
 
       // Reset the authWindow on close
       this.authWindow.on('close', () => {
-          this.authWindow = null;
+        this.authWindow = null;
       }, false);
 
 
@@ -100,7 +97,7 @@ class GithubHandler {
       const error = /\?error=(.+)$/.exec(url);
 
       if (code || error) {
-        // Close the browser if code found or error
+        // Close the window if code found or error
         this.authWindow.destroy();
       }
 
@@ -132,13 +129,31 @@ class GithubHandler {
         .then((res) => {
           let token = res.body.access_token
           this.store.set('token', token)
-          bridge.send(githubAuthSuccess(token))
+          this.testToken(token)
         })
         .catch(err => {
           Logger.error(err)
         })
     }catch(err) {
-      Logger.error(err)      
+      Logger.error(err)
+    }
+  }
+
+  testToken(token){
+    try{
+      request
+        .get('https://api.github.com/user')
+        .set('Authorization', `token ${token}`)
+        .end((err, res) => {
+          if(err){
+            bridge.send(githubAuthFailure('Token not valid'))
+            this.store.remove('token')
+          }else{
+            bridge.send(githubAuthSuccess(token, res.body))
+          }
+        })
+    }catch(err){
+      bridge.send(githubAuthFailure(err))
     }
   }
 

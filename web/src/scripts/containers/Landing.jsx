@@ -40,6 +40,7 @@ class Landing extends Component {
       height: 450,
       center: true,
     }))
+    this.props.dispatch(githubLoginRequest())
   }
   render() {
     const {recentProjects} = this.state
