@@ -1,10 +1,15 @@
 import { dialog, BrowserWindow } from 'electron'
 import request from 'superagent'
 import fs from 'fs'
+import _ from 'lodash'
 import GithubConsts from 'shared/constants/ipc/GithubConstants'
 import MetaComponentConsts from 'shared/constants/ipc/MetaComponentConstants'
+import { fork } from 'child_process'
+import path from 'path'
 import bridge from '../bridge'
 import Logger from '../log/logger'
+import npm from '../process/npmController'
+import { startProgressBar, updateProgressBar, endProgressBar } from '../actions/uiActions'
 import { githubAuthSuccess, githubAuthFailure } from '../actions/githubActions'
 import { componentListSuccess, componentListFailure } from '../actions/metaComponentActions'
 import Store from '../Utils/Store'
@@ -41,16 +46,18 @@ class GithubHandler {
       }
     });
 
-    this.token = null
+    this.token = this.store.get('token')
 
   }
 
+  // Register actions coming from the render process
   register(){
     bridge.on(GITHUB_AUTH_REQUESTED, this.githubAuthCheck.bind(this))
     bridge.on(MC_LIST_REQUEST, this.fetchComponentList.bind(this))
     bridge.on(MC_INSTALL_COMPONENT, this.installMetaComponent.bind(this))
   }
 
+  // Check if token exists, if it works, test it or else go through the login process
   githubAuthCheck(){
     try{
       let githubToken = this.store.get('token')
@@ -75,8 +82,11 @@ class GithubHandler {
         'node-integration': false 
       });
       
+      // Set up authorization uri uri 
       const githubUrl = 'https://github.com/login/oauth/authorize?';
       const authUrl = githubUrl + 'client_id=' + options.client_id + '&scope=' + options.scopes;
+
+      // Show the window
       this.authWindow.loadURL(authUrl);
       this.authWindow.show();
 
@@ -101,16 +111,17 @@ class GithubHandler {
     
   }
 
-
+  // see what the authorization process has sent
   handleCallback (url) {    
     try{
-    
+      
+      // see if code parameter exists in the url
       const raw_code = /code=([^&]*)/.exec(url) || null;
       const code = (raw_code && raw_code.length > 1) ? raw_code[1] : null;
       const error = /\?error=(.+)$/.exec(url);
 
+      // Close the window if code found or error
       if (code || error) {
-        // Close the window if code found or error
         this.authWindow.destroy();
       }
 
@@ -121,6 +132,7 @@ class GithubHandler {
         alert('Oops! Something went wrong and we couldn\'t' +
           'log you in using Github. Please try again.');
       }
+
     }catch(err) {
       Logger.error(err)
     }
@@ -130,6 +142,8 @@ class GithubHandler {
 
   requestGithubToken(code){
     try{
+
+      // Access token request
       request
         .post('https://github.com/login/oauth/access_token')
         .set('Content-Type', 'application/json')
@@ -141,7 +155,11 @@ class GithubHandler {
         })
         .then((res) => {
           let token = res.body.access_token
+
+          // Save for future use
           this.store.set('token', token)
+
+          // Test the token
           this.testToken(token)
         })
         .catch(err => {
@@ -154,15 +172,20 @@ class GithubHandler {
 
   testToken(token){
     try{
+      // Get the auth user
+      // TODO Check if organization is codebrahma
       request
         .get('https://api.github.com/user')
         .set('Authorization', `token ${token}`)
         .end((err, res) => {
+          // Send event back to the render process
           if(err){
             bridge.send(githubAuthFailure('Token not valid'))
+            // Cause the token is of no use
             this.store.remove('token')
           }else{
             bridge.send(githubAuthSuccess(token, res.body))
+            // Set it to the class so we have access for later requests
             this.token = token
           }
         })
@@ -171,10 +194,13 @@ class GithubHandler {
     }
   }
 
+
+  // Get the list of components available in the repo on github
   fetchComponentList(){
     try{
       request
-        .get(`https://raw.githubusercontent.com/Codebrahma/edge-meta/new-structure/index.json`)
+        // TODO change branch when merged with master      
+        .get(`https://raw.githubusercontent.com/Codebrahma/edge-meta/new-structure/index.json`) 
         .set('Authorization', `token ${this.token}`)
         .end((err, res) => {
           if(err){
@@ -182,7 +208,7 @@ class GithubHandler {
             console.log('request error: ', err)
           }else{
             const json = JSON.parse(res.text)
-            bridge.send(componentListSuccess(json.modules))
+            bridge.send(componentListSuccess(json.components))
           }
         })
     }catch(err){
@@ -192,35 +218,150 @@ class GithubHandler {
 
   }
 
+  // start the install process of a meta-component
   installMetaComponent(payload, respond){
     try{
-      payload.component.modules.forEach(module => {
-        fs.mkdirSync(`${TEMP_PROJECT_FOLDER}/modules/${module}`)
-        request
-          .get(`https://api.github.com/repos/Codebrahma/edge-meta/contents/modules${module}`)
-          .set('Authorization', `token ${this.token}`)
-          .query({ref: 'new-structure'})
-          .end((err, res) => {
-            if(err){
-              console.error(err)
-            }else{
-              const files = res.body
-              files.forEach(file => {
-                // Base64.decode(encodedString);
-                fs.writeFileSync(`${TEMP_PROJECT_FOLDER}/${file.path}`, "test")
-              })
-            }
-          })
-          
-      })
+      // Copy modules
+      this.copyModules(payload.component)
     }catch (err) {
       console.error(err)
     }
   }
 
 
+  copyModules(component){
+    try{
+      // Component can have many modules
+      component.modules.forEach(module => {
+        // Only when it is the temp folder -> TODO
+        const path = `${TEMP_PROJECT_FOLDER}/modules/${module}` 
+        // if path exists, user has already installed this component before
+        if(!fs.existsSync(path)){
+          // Create a folder for the module
+          fs.mkdirSync(`${TEMP_PROJECT_FOLDER}/modules/${module}`)
+          // Find what the module folder contains and copy it to the local folder
+          request
+            .get(`https://api.github.com/repos/Codebrahma/edge-meta/contents/modules/${module}`)
+            .set('Authorization', `token ${this.token}`)
+            .query({ref: 'new-structure'})
+            .end((err, res) => {
+              if(err){
+                console.error(err)
+              }else{
+                const contents = res.body
+                // Assuming a flat structure, no dir inside module dir
+                contents.forEach(item => {
+                  if(item.type === 'file'){
+                    request
+                      .get(item.git_url)
+                      .set('Authorization', `token ${this.token}`)
+                      .end((err, res) => {
+                        if(err){
+                          console.log(err)
+                        }else{
+                          try{
+                            const b64content = res.body.content
+                            const content = new Buffer(b64content, 'base64')
+                            if(item.name === '.meta.json'){
+                              const data = JSON.parse(content.toString())
+                              if(data.dependencies && data.dependencies.length > 0){
+                                // Install npm modules
+                                this.installNodeModules(data.dependencies)
+                                if(data.native && data.native.length > 0){
+                                  // Link native modules
+                                  // this.linkNativeModules(data.native)
+                                }
+                              }
+                            }else{
+                              // Create the file
+                              fs.writeFileSync(`${TEMP_PROJECT_FOLDER}/modules/${module}/${item.name}`, content)
+                            }
+                          }catch(e){
+                            console.log(e)
+                          }
+                        }
+                      })
+                  }
+                })
+              }
+            })
+        }
+        
+      })
+    }catch(err){
+      console.log(err)
+    }
+  }
+
+  installNodeModules(dependencies){
+    dependencies.forEach(dep => {
+      const progressCallback = _.throttle((percent) => {
+        bridge.send(updateProgressBar(dep, percent * 100))
+      }, 250)
+
+      bridge.send(startProgressBar(dep, 0))
+
+      try {
+        const command = [ 'install', '-S', `${dep}`]
+
+        Logger.info(`npm ${command.join(' ')}`)
+
+        npm.run(command, {cwd: TEMP_PROJECT_FOLDER}, (err) => {
+
+          // Ensure a trailing throttled call doesn't fire
+          progressCallback.cancel()
+
+          bridge.send(endProgressBar(dep, 100))
+
+          if (err) {
+            Logger.info(`npm: dependency ${dep} failed to install`)
+            // respond(onError(ModuleConstants.IMPORT_MODULE))
+          } else {
+            Logger.info(`npm: dependency ${dep} installed successfully`)
+            // respond(onSuccess(ModuleConstants.IMPORT_MODULE))
+          }
+        }, progressCallback)
+      } catch(e) {
+        Logger.error(e)
+        // respond(onError(ModuleConstants.IMPORT_MODULE))
+      }
+
+    })
+  }
+
+  linkNativeModules(nativeModules){
 
 
+    try{
+      const path = npm.run(['root', '-g'], {}, (err) => {
+        console.log('error')
+      })
+
+      console.log('path:', path)
+    }catch(e){
+      console.error(e)
+    }
+    
+
+
+    // try{
+    //   nativeModules.forEach(module => {
+
+    //     var execPath = path.join(TEMP_PROJECT_FOLDER, '/node_modules/react-native/local-cli/cli.js')
+
+    //     const cmd = ['link']
+
+    //     var child = fork(execPath, cmd)
+
+    //     child.on('error', (err => {
+    //       console.log(err)
+    //     }))
+        
+    //   })
+    // }catch(err){
+    //   console.log(err)
+    // }
+  }
 }
 const handler = new GithubHandler()
 
