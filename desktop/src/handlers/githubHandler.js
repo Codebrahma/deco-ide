@@ -6,6 +6,7 @@ import GithubConsts from 'shared/constants/ipc/GithubConstants'
 import MetaComponentConsts from 'shared/constants/ipc/MetaComponentConstants'
 import { fork } from 'child_process'
 import path from 'path'
+import cmd from 'node-cmd'
 import bridge from '../bridge'
 import Logger from '../log/logger'
 import npm from '../process/npmController'
@@ -266,11 +267,13 @@ class GithubHandler {
                               const data = JSON.parse(content.toString())
                               if(data.dependencies && data.dependencies.length > 0){
                                 // Install npm modules
-                                this.installNodeModules(data.dependencies)
-                                if(data.native && data.native.length > 0){
-                                  // Link native modules
-                                  // this.linkNativeModules(data.native)
-                                }
+                                this.installNodeModules(data.dependencies, (dep) => {
+                                  if(data.native && data.native.includes(dep)){
+                                    // Link native modules
+                                    this.linkNativeModules(dep)
+                                  }
+                                })
+                                
                               }
                             }else{
                               // Create the file
@@ -293,7 +296,7 @@ class GithubHandler {
     }
   }
 
-  installNodeModules(dependencies){
+  installNodeModules(dependencies, onFinish){
     dependencies.forEach(dep => {
       const progressCallback = _.throttle((percent) => {
         bridge.send(updateProgressBar(dep, percent * 100))
@@ -312,6 +315,7 @@ class GithubHandler {
           progressCallback.cancel()
 
           bridge.send(endProgressBar(dep, 100))
+          onFinish(dep)
 
           if (err) {
             Logger.info(`npm: dependency ${dep} failed to install`)
@@ -329,38 +333,22 @@ class GithubHandler {
     })
   }
 
-  linkNativeModules(nativeModules){
+  linkNativeModules(nativeDep){
 
-
+    console.log('linking native modules')
+    
     try{
-      const path = npm.run(['root', '-g'], {}, (err) => {
-        console.log('error')
+      cmd.get(`cd ${TEMP_PROJECT_FOLDER} && react-native link ${nativeDep}`, (err, data, stderr) => {
+        if(err){
+          console.log('err: ', err)
+        }else{
+          console.log('response:', data)
+        }
+        console.log(stderr)
       })
-
-      console.log('path:', path)
     }catch(e){
       console.error(e)
     }
-    
-
-
-    // try{
-    //   nativeModules.forEach(module => {
-
-    //     var execPath = path.join(TEMP_PROJECT_FOLDER, '/node_modules/react-native/local-cli/cli.js')
-
-    //     const cmd = ['link']
-
-    //     var child = fork(execPath, cmd)
-
-    //     child.on('error', (err => {
-    //       console.log(err)
-    //     }))
-        
-    //   })
-    // }catch(err){
-    //   console.log(err)
-    // }
   }
 }
 const handler = new GithubHandler()
