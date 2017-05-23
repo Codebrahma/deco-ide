@@ -17,7 +17,7 @@
 
 import React, { Component, PropTypes, } from 'react'
 import { connect } from 'react-redux'
-
+import { getRootPath } from '../utils/PathUtils'
 import ComponentList from '../components/menu/ComponentList'
 import { 
   fetchMetaComponentList, 
@@ -40,12 +40,20 @@ class ComponentBrowser extends Component {
     this.props.fetchComponentList()
   }
 
+  handleComponentInstallRequest(component){    
+    // Getting the project path
+    const path = getRootPath(this.props)
+
+    this.props.installComponent(component, path)
+
+  }
+
   render() {
     return (
       <div style={styles.main}>
         <ComponentList 
           components={this.props.components}
-          onInstallClicked={(component) => this.props.installComponent(component)}
+          onInstallClicked={(component) => this.handleComponentInstallRequest(component)}
         />
       </div>
     )
@@ -53,12 +61,13 @@ class ComponentBrowser extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  components: state.components
+  components: state.components,
+  routing: state.routing
 })
 
 const mapDispatchToProps = (dispatch) => ({
   fetchComponentList: () => {dispatch(fetchMetaComponentList())},
-  installComponent: (component) => {dispatch(installComponent(component))}
+  installComponent: (component, path) => {dispatch(installComponent(component, path))}
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ComponentBrowser)

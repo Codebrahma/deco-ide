@@ -223,23 +223,22 @@ class GithubHandler {
   installMetaComponent(payload, respond){
     try{
       // Copy modules
-      this.copyModules(payload.component)
+      this.copyModules(payload.component, payload.path)
     }catch (err) {
       console.error(err)
     }
   }
 
 
-  copyModules(component){
+  copyModules(component, path){
     try{
       // Component can have many modules
       component.modules.forEach(module => {
-        // Only when it is the temp folder -> TODO
-        const path = `${TEMP_PROJECT_FOLDER}/modules/${module}` 
+        const modulePath = `${path}/modules/${module}` 
         // if path exists, user has already installed this component before
-        if(!fs.existsSync(path)){
+        if(!fs.existsSync(modulePath)){
           // Create a folder for the module
-          fs.mkdirSync(`${TEMP_PROJECT_FOLDER}/modules/${module}`)
+          fs.mkdirSync(modulePath)
           // Find what the module folder contains and copy it to the local folder
           request
             .get(`https://api.github.com/repos/Codebrahma/edge-meta/contents/modules/${module}`)
@@ -263,21 +262,22 @@ class GithubHandler {
                           try{
                             const b64content = res.body.content
                             const content = new Buffer(b64content, 'base64')
+                            
                             if(item.name === '.meta.json'){
                               const data = JSON.parse(content.toString())
                               if(data.dependencies && data.dependencies.length > 0){
                                 // Install npm modules
-                                this.installNodeModules(data.dependencies, (dep) => {
+                                this.installNodeModules(data.dependencies, path, (dep, path) => {
                                   if(data.native && data.native.includes(dep)){
                                     // Link native modules
-                                    this.linkNativeModules(dep)
+                                    this.linkNativeModules(dep, path)
                                   }
                                 })
                                 
                               }
                             }else{
                               // Create the file
-                              fs.writeFileSync(`${TEMP_PROJECT_FOLDER}/modules/${module}/${item.name}`, content)
+                              fs.writeFileSync(`${modulePath}/${item.name}`, content)
                             }
                           }catch(e){
                             console.log(e)
@@ -296,7 +296,7 @@ class GithubHandler {
     }
   }
 
-  installNodeModules(dependencies, onFinish){
+  installNodeModules(dependencies, path, onFinish){
     dependencies.forEach(dep => {
       const progressCallback = _.throttle((percent) => {
         bridge.send(updateProgressBar(dep, percent * 100))
@@ -309,42 +309,37 @@ class GithubHandler {
 
         Logger.info(`npm ${command.join(' ')}`)
 
-        npm.run(command, {cwd: TEMP_PROJECT_FOLDER}, (err) => {
+        npm.run(command, {cwd: path}, (err) => {
 
           // Ensure a trailing throttled call doesn't fire
           progressCallback.cancel()
 
           bridge.send(endProgressBar(dep, 100))
-          onFinish(dep)
+
+          // Call on finish when the progress is 100%
+          onFinish(dep, path)
 
           if (err) {
             Logger.info(`npm: dependency ${dep} failed to install`)
-            // respond(onError(ModuleConstants.IMPORT_MODULE))
           } else {
             Logger.info(`npm: dependency ${dep} installed successfully`)
-            // respond(onSuccess(ModuleConstants.IMPORT_MODULE))
           }
         }, progressCallback)
       } catch(e) {
         Logger.error(e)
-        // respond(onError(ModuleConstants.IMPORT_MODULE))
       }
 
     })
   }
 
-  linkNativeModules(nativeDep){
-
-    console.log('linking native modules')
-    
+  linkNativeModules(nativeDep, path){    
     try{
-      cmd.get(`cd ${TEMP_PROJECT_FOLDER} && react-native link ${nativeDep}`, (err, data, stderr) => {
+      cmd.get(`cd ${path} && react-native link ${nativeDep}`, (err, data, stderr) => {
         if(err){
-          console.log('err: ', err)
+          console.log('rn link err: ', err)
         }else{
-          console.log('response:', data)
+          console.log('rn link:', data)
         }
-        console.log(stderr)
       })
     }catch(e){
       console.error(e)

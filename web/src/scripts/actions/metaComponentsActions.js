@@ -33,11 +33,12 @@ export function componentListFailed(error){
   }
 }
 
-export function installComponent(component){
+export function installComponent(component, path){
   return function(dispatch){
     request({
       type: MC_INSTALL_COMPONENT,
-      component
+      component,
+      path
     })
   }
 }
