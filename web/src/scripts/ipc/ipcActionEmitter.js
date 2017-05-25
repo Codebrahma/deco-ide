@@ -51,8 +51,14 @@ import {
 import { tabActions } from '../actions'
 
 import {
-  githubLoginSuccess
+  githubLoginSuccess,
+  githubLoginFailure
 } from '../actions/loginActions'
+
+import {
+  componentListSuccess,
+  componentListFailed
+} from '../actions/metaComponentsActions'
 
 import AcceleratorConstants from 'shared/constants/ipc/AcceleratorConstants'
 const {
@@ -105,6 +111,13 @@ const {
   GITHUB_AUTH_SUCCESS,
   GITHUB_AUTH_FAILURE
 } = GithubConsts
+
+import MetaComponentConsts from 'shared/constants/ipc/MetaComponentConstants'
+const {
+  MC_LIST_REQUEST,
+  MC_LIST_SUCCESS,
+  MC_LIST_FAILURE
+} = MetaComponentConsts
 
 import { ProcessStatus } from '../constants/ProcessStatus'
 
@@ -225,9 +238,23 @@ const ipcActionEmitter = (store) => {
   })
 
   ipc.on(GITHUB_AUTH_SUCCESS, (evt, obj) => {
-    const { accessToken } = obj
-    store.dispatch(githubLoginSuccess(accessToken))
+    const { accessToken, user } = obj
+    store.dispatch(githubLoginSuccess(accessToken, user))
   })
+
+  ipc.on(GITHUB_AUTH_FAILURE, (evt, obj) => {
+    const { error } = obj
+    store.dispatch(githubLoginFailure(error))
+  })
+
+  ipc.on(MC_LIST_SUCCESS, (evt, obj) => {
+    store.dispatch(componentListSuccess(obj.list))
+  })
+
+  ipc.on(MC_LIST_FAILURE, (evt, obj) => {
+    store.dispatch(componentListFailed(obj.error))
+  })
+
 }
 
 export default ipcActionEmitter

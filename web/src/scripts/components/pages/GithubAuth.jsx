@@ -1,39 +1,34 @@
 import React from 'react'
 import GithubIcon from '../display/GithubIcon'
 
+const container = {
+  display: 'flex',
+  flex: 1,
+  alignItems: 'center',
+  justifyContent: 'center'
+}
 
-const options = {
-  client_id: '6d5bcbdda5b24161cfae',
-  client_secret: 'bf39ebedd45660e137de57d40ed1280c87d1aad9',
-  scopes: ["user", "repo"]
-};
-
+const button = {
+  display: 'flex',
+  flexDirection: 'row',
+  padding: 10,
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  backgroundColor: '#f3f3f3',
+  border: '1px solid #aaa',
+  width: 200
+}
 
 class GithubAuth extends React.Component {
-  constructor(props){
-    super(props)
-
-    this.state = {
-      status: 'Checking auth'
-    }
-
-  }
-
-  requestGithubToken(code){
-
-    this.setState({
-      status: 'Getting Access Token'
-    })
-
-  }
-
 
   render(){
-
     return(
-      <div style={{ flex: 1 }}>
-        <button onClick={() => this.props.onLoginRequested()}>
-          <GithubIcon />
+      <div style={container}>
+        <button 
+          style={button}
+          onClick={() => this.props.onLoginRequested()}
+        >
+          <GithubIcon style={{margin: 10}}/>
           Login Via Github
         </button>
       </div>

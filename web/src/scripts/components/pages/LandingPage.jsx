@@ -35,12 +35,18 @@ const style = {
   WebkitAppRegion: 'drag',
 }
 
-const topStyle = {
+const header = {
   flex: '1',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'stretch',
   minHeight: 0,
+}
+
+const body = {
+  flex: 2,
+  display: 'flex',
+  flexDirection: 'column'
 }
 
 const bottomStyle = {
@@ -74,19 +80,23 @@ const logoWrapperStyle = {
 }
 
 const loginWrapper = {
-  flex: 3
+  display: 'flex',
+  flex: 3,
+  aligItems: 'center',
+  jsutifyContent: 'center',
+  flexDirection: 'column'
 }
 
 const LandingPage = ({ onOpen, onCreateNew, recentProjects, auth, loginRequest }) => {
   return (
     <div className='vbox helvetica-smooth' style={style}>
-      <div style={topStyle}>
+      <div style={header}>
         <div style={logoWrapperStyle}>
           <EdgeLogo/>
         </div>
       </div>
       {auth.isAuth ? (
-        <div>
+        <div style={body}>
           <div style={projectListStyle}>
             <div style={projectWrapperStyle}>
               <ProjectListItem
@@ -120,7 +130,12 @@ const LandingPage = ({ onOpen, onCreateNew, recentProjects, auth, loginRequest }
         </div>
       ) : (
         <div style={loginWrapper}>
-          <GithubAuth onLoginRequested={() => loginRequest()}  />
+          {auth.isLoading? (
+            <p>Loading...</p>
+          ) : (
+            <GithubAuth onLoginRequested={() => loginRequest()}  />
+          )}
+          {auth.error && <p style={{color: 'red', textAlign: 'center'}}>Error: {auth.error}</p>}
         </div>
       )}
     </div>

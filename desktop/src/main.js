@@ -78,7 +78,8 @@ app.on('ready', function() {
   // Add sync service back when we turn on storyboards
   // SyncServiceController.start()
 
-  installDevTools()
+  // gives an error when building
+  // installDevTools()
 
   WindowManager.checkNeedsUpgrade(version).then(() => {
     //initialize browser window!

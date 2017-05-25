@@ -19,9 +19,9 @@ import React, { Component, } from 'react'
 
 const styles = {
   github: {
-    width: 20,
-    height: 20,
-    backgroundSize: '20px 20px',
+    width: 25,
+    height: 25,
+    backgroundSize: '25px 25px',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
     backgroundImage: `-webkit-image-set(url('./images/github-logo.png') 1x, url('./images/github-logo@2x.png') 2x)`,

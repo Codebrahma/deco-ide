@@ -17,12 +17,12 @@
 
 import React, { Component, PropTypes, } from 'react'
 import { connect } from 'react-redux'
-import { createSelector } from 'reselect'
-
-import * as selectors from '../selectors'
-import PaneHeader from '../components/headers/PaneHeader'
-import { FilterableList, DraggableComponentMenuItem } from '../components'
-import { CATEGORIES, PREFERENCES } from 'shared/constants/PreferencesConstants'
+import { getRootPath } from '../utils/PathUtils'
+import ComponentList from '../components/menu/ComponentList'
+import { 
+  fetchMetaComponentList, 
+  installComponent 
+} from '../actions/metaComponentsActions'
 
 const styles = {
   main: {
@@ -31,34 +31,43 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'stretch',
     overflow: 'hidden',
-  },
+  }
 }
 
-const mapStateToProps = (state) => createSelector(
-  selectors.componentList,
-  (componentList) => ({
-    componentList,
-  })
-)
-
 class ComponentBrowser extends Component {
-  render() {
-    const {componentList, style, onSelectItem, onClickItem, onDoubleClickItem, onContextMenuItem} = this.props
 
+  componentDidMount(){
+    this.props.fetchComponentList()
+  }
+
+  handleComponentInstallRequest(component){    
+    // Getting the project path
+    const path = getRootPath(this.props)
+
+    this.props.installComponent(component, path)
+
+  }
+
+  render() {
     return (
       <div style={styles.main}>
-        <FilterableList
-          ItemComponent={DraggableComponentMenuItem}
-          items={componentList}
-          onClickItem={onClickItem}
-          onSelectItem={onSelectItem}
-          onDoubleClickItem={onDoubleClickItem}
-          onContextMenuItem={onContextMenuItem}
-          autoSelectFirst={false}
+        <ComponentList 
+          components={this.props.components}
+          onInstallClicked={(component) => this.handleComponentInstallRequest(component)}
         />
       </div>
     )
   }
 }
 
-export default connect(mapStateToProps)(ComponentBrowser)
+const mapStateToProps = (state) => ({
+  components: state.components,
+  routing: state.routing
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  fetchComponentList: () => {dispatch(fetchMetaComponentList())},
+  installComponent: (component, path) => {dispatch(installComponent(component, path))}
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(ComponentBrowser)
