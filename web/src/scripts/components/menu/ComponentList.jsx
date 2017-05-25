@@ -4,8 +4,8 @@ import React, { Component } from 'react'
 const styles = {
   item: {
     display: 'flex',
-    padding: 10,
-    flexDirection: 'column',
+    padding: 5,
+    flexDirection: 'row',
     borderBottom: '1px #F6F6F6 solid'
   },
   name: {
@@ -21,7 +21,7 @@ const styles = {
     border: 'steelblue 1px solid',
     borderRadius: 3,
     width: 100,
-    alignSelf: 'flex-end'
+    alignSelf: 'center'
   }
 }
 
@@ -32,16 +32,18 @@ class ComponentList extends Component {
     return(
       <div>
         {isLoading ? <p>Loading..</p> : (
-          <div>
+          <div className="vbox">
             {list.map((component, i) => {
               return(
                 <div key={i} style={styles.item}>
-                  <span style={styles.name}>
-                    {component.name}
-                  </span>
-                  <p style={styles.description}>
-                    {component.description}
-                  </p>
+                  <div style={{ flex: 1 }}>
+                    <span style={styles.name}>
+                      {component.name}
+                    </span>
+                    <p style={styles.description}>
+                      {component.description}
+                    </p>
+                  </div>
                   <button 
                     style={styles.button}
                     onClick={() => this.props.onInstallClicked(component)}
