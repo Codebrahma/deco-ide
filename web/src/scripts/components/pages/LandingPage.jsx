@@ -22,6 +22,7 @@ import EdgeLogo from '../display/EdgeLogo'
 import NewIcon from '../display/NewIcon'
 import LandingButton from '../buttons/LandingButton'
 import ProjectListItem from '../buttons/ProjectListItem'
+import GithubAuth from '../pages/GithubAuth'
 
 const style = {
   position: 'absolute',
@@ -34,12 +35,18 @@ const style = {
   WebkitAppRegion: 'drag',
 }
 
-const topStyle = {
-  flex: '1 1 auto',
+const header = {
+  flex: '1',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'stretch',
   minHeight: 0,
+}
+
+const body = {
+  flex: 2,
+  display: 'flex',
+  flexDirection: 'column'
 }
 
 const bottomStyle = {
@@ -69,45 +76,68 @@ const logoWrapperStyle = {
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
+  fontSize: 25
 }
 
-const LandingPage = ({ onOpen, onCreateNew, recentProjects }) => {
+const loginWrapper = {
+  display: 'flex',
+  flex: 3,
+  aligItems: 'center',
+  jsutifyContent: 'center',
+  flexDirection: 'column'
+}
+
+const LandingPage = ({ onOpen, onCreateNew, recentProjects, auth, loginRequest }) => {
   return (
     <div className='vbox helvetica-smooth' style={style}>
-      <div style={topStyle}>
+      <div style={header}>
         <div style={logoWrapperStyle}>
           <EdgeLogo/>
         </div>
-        <div style={projectListStyle}>
-          <div style={projectWrapperStyle}>
-            <ProjectListItem
-              onClick={onOpen.bind(null, null)}
-              title={'Open Project...'}
-            />
-            {_.map(recentProjects, (projectPath) => {
-              const base = path.basename(projectPath)
-              const dir = path.dirname(projectPath)
+      </div>
+      {auth.isAuth ? (
+        <div style={body}>
+          <div style={projectListStyle}>
+            <div style={projectWrapperStyle}>
+              <ProjectListItem
+                onClick={onOpen.bind(null, null)}
+                title={'Open Project...'}
+              />
+              {_.map(recentProjects, (projectPath) => {
+                const base = path.basename(projectPath)
+                const dir = path.dirname(projectPath)
 
-              return (
-                <ProjectListItem
-                  key={projectPath}
-                  onClick={onOpen.bind(null, projectPath)}
-                  title={base}
-                  path={dir}
-                />
-              )
-            })}
+                return (
+                  <ProjectListItem
+                    key={projectPath}
+                    onClick={onOpen.bind(null, projectPath)}
+                    title={base}
+                    path={dir}
+                  />
+                )
+              })}
+            </div>
+          </div>
+          <div style={bottomStyle}>
+            <LandingButton
+              id={'new-project'}
+              onClick={onCreateNew}
+            >
+              <NewIcon />
+              New Project
+            </LandingButton>
           </div>
         </div>
-      </div>
-      <div style={bottomStyle}>
-        <LandingButton
-          id={'new-project'}
-          onClick={onCreateNew}>
-          <NewIcon />
-          New Project
-        </LandingButton>
-      </div>
+      ) : (
+        <div style={loginWrapper}>
+          {auth.isLoading? (
+            <p>Loading...</p>
+          ) : (
+            <GithubAuth onLoginRequested={() => loginRequest()}  />
+          )}
+          {auth.error && <p style={{color: 'red', textAlign: 'center'}}>Error: {auth.error}</p>}
+        </div>
+      )}
     </div>
   )
 }

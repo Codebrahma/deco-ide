@@ -23,6 +23,7 @@ import windowHandler from '../handlers/windowHandler'
 import processHandler from '../handlers/processHandler'
 import moduleHandler from '../handlers/moduleHandler'
 import preferenceHandler from '../handlers/preferenceHandler'
+import githubHandler from '../handlers/githubHandler'
 
 const handlers = [
   projectHandler,
@@ -31,6 +32,7 @@ const handlers = [
   fileHandler,
   moduleHandler,
   preferenceHandler,
+  githubHandler
 ]
 
 export const registerHandlers = () => {

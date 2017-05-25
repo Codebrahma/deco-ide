@@ -85,7 +85,7 @@ export const fetchTemplateAndImportDependencies = (deps, textUrl, metadataUrl, p
       fetchTemplateMetadata(metadataUrl),
     ]).then(([text, metadata]) => {
 
-      TemplateCache.put(textUrl, metadataUrl, text, metadata)
+      // TemplateCache.put(textUrl, metadataUrl, text, metadata)
 
       return {
         text,
@@ -94,45 +94,34 @@ export const fetchTemplateAndImportDependencies = (deps, textUrl, metadataUrl, p
     })
   }
 
-  // Always fetch local files
-  if (FetchUtils.isLocal(textUrl)) {
-    return performFetch()
+  return performFetch()
 
-  // Return result from cache, or fetch on failure
-  } else {
-    return TemplateCache.get(textUrl, metadataUrl).then(({text, metadata}) => {
-      return {text, metadata}
-    }).catch(performFetch)
-  }
+  // Always fetch local files
+  // if (FetchUtils.isLocal(textUrl)) {
+  //   return performFetch()
+
+  // // Return result from cache, or fetch on failure
+  // } else {
+  //   return TemplateCache.get(textUrl, metadataUrl).then(({text, metadata}) => {
+  //     return {text, metadata}
+  //   }).catch(performFetch)
+  // }
 
 }
 
 export const fetchModuleRegistry = (url) => {
-  return RegistryCache.get(url).catch((err) => {
 
-    const staleValue = err && err.code === CACHE_STALE && err.value
-
-    // On cache miss, fetch
-    return fetch(url).then((result) => {
+  return fetch(url)
+    .then((result) => {
       return result.json()
-
-    // Add to cache
-    }).then((packageJSON) => {
-      // RegistryCache.put(url, packageJSON)
-      return packageJSON
-
-    // Failed to fetch... use staleValue if available
-    }).catch((err) => new Promise((resolve, reject) => {
-      if (staleValue) {
-        resolve(staleValue)
-      } else {
-        reject(err)
-      }
+    })
+    .then((packageJSON) => {
+      return _.get(packageJSON, 'edge.components', [])
+    })
+    .catch((err) => new Promise((resolve, reject) => {
+      reject(err)
+      console.log(err)
     }))
-
-  }).then((packageJSON) => {
-    return _.get(packageJSON, 'edge.components', [])
-  })
 }
 
-export const DEFAULT_REGISTRY = "https://rawgit.com/Codebrahma/edge-components/master/package.json"
+export const DEFAULT_REGISTRY = "https://rawgit.com/Codebrahma/edge-meta/master/package.json"

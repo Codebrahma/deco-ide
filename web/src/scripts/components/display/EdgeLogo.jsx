@@ -6,8 +6,8 @@ export default class EdgeLogo extends Component {
       <div style={{
           backgroundImage: 'url(images/edge-logo.png)',
           backgroundSize: 'cover',
-          width: '170px',
-          height: '42px',
+          width: '214px',
+          height: '54px',
         }}/>
     )
   }

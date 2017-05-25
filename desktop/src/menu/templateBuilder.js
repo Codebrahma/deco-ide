@@ -379,7 +379,7 @@ const TemplateBuilder = function(platform) {
       click: function() {
         bridge.send(toggleTerm())
       }
-    }, ]
+    }]
   }
 
   //TURN ON DEVELOPER TOOLS WHEN IN DEV MODE

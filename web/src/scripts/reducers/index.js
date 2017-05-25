@@ -25,10 +25,12 @@ import metadataReducer from './metadata/metadataReducer'
 import uiReducer from './uiReducer'
 import preferencesReducer from './preferencesReducer'
 import modules from './moduleReducer'
-import components from './componentReducer'
+// import components from './componentReducer'
 import user from './userReducer'
 import ast from './astReducer'
 import elementTree from './elementTreeReducer'
+import auth from './authReducer'
+import components from './metaComponentReducer'
 
 const rootReducer = combineReducers({
   directory: fileReducer,
@@ -44,6 +46,7 @@ const rootReducer = combineReducers({
   user,
   ast,
   elementTree,
+  auth
 })
 
 export default rootReducer

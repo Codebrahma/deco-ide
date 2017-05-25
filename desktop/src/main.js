@@ -55,6 +55,7 @@ app.on('window-all-closed', function() {
   }
 })
 
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // THIS IS WHERE DECO APP FUNCTIONALITY SHOULD LIVE, EXERCISE CAUTION OUTSIDE THIS FUNCTION
@@ -77,7 +78,8 @@ app.on('ready', function() {
   // Add sync service back when we turn on storyboards
   // SyncServiceController.start()
 
-  installDevTools()
+  // gives an error when building
+  // installDevTools()
 
   WindowManager.checkNeedsUpgrade(version).then(() => {
     //initialize browser window!

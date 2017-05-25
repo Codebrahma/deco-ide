@@ -20,6 +20,7 @@ import { routeActions, } from 'react-router-redux'
 import { connect } from 'react-redux'
 
 import { createProject, openProject, } from '../actions/applicationActions'
+import { githubLoginRequest } from '../actions/loginActions'
 import { resizeWindow, } from '../actions/uiActions'
 import RecentProjectUtils from '../utils/RecentProjectUtils'
 
@@ -39,6 +40,7 @@ class Landing extends Component {
       height: 450,
       center: true,
     }))
+    this.props.dispatch(githubLoginRequest())
   }
   render() {
     const {recentProjects} = this.state
@@ -46,14 +48,23 @@ class Landing extends Component {
     return (
       <LandingPage
         recentProjects={recentProjects}
+        auth={this.props.auth}
         onOpen={(path) => {
           this.props.dispatch(openProject(path))
         }}
         onCreateNew={() => {
           this.props.dispatch(createProject())
-        }} />
+        }}
+        loginRequest={() => {
+          this.props.dispatch(githubLoginRequest())
+        }} 
+      />
     )
   }
 }
 
-export default connect()(Landing)
+const mapStateToProps = (state) => ({
+  auth: state.auth
+})
+
+export default connect(mapStateToProps)(Landing)
