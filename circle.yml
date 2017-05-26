@@ -1,0 +1,3 @@
+dependencies:
+  override:
+    - npm i && ./build/install-dependencies.sh
