@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
-npm install -g npm
 npm install -g gulp
 
 cd ./shared
