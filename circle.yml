@@ -1,9 +1,0 @@
-machine:
-  node
-dependencies:
-  override:
-    - ./build/install-dependencies.sh
-  cache_directories:
-    - "shared/node_modules"
-    - "desktop/node_modules"
-    - "web/node_modules"
