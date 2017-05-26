@@ -6,3 +6,6 @@
 /dist
 /desktop/tests/integration/snapshot/tmp
 /web/public/images
+
+# node stuff
+node_modules

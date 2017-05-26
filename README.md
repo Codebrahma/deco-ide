@@ -100,6 +100,11 @@ $ cd ./desktop
 $ npm run pack
 ```
 
+### Linting and testing
+
+* Run `npm test` in root directory to see the lint errors.
+* Running `npm run lint:fix` in `/web` or `/desktop` will fix trivial fixable eslint errors.
+
 The resulting .pkg file will be output to `./dist/osx/Deco-$VERSION.pkg`
 
 This build is for local testing only. When you install, the system will generate a warning about this being from an unapproved developer — this is because the package is not signed when building locally.
