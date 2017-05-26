@@ -1,0 +1,24 @@
+{
+  "name": "edge-ide",
+  "version": "1.0.0",
+  "description": "Edge IDE for rapid development",
+  "main": "run-dev.js",
+  "scripts": {
+    "lint": "eslint ./*.js",
+    "lint:fix": "eslint ./*.js --fix",
+    "test": "npm run lint && bash test.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Codebrahma/edge-ide.git"
+  },
+  "author": "Codebrahma",
+  "license": "UNLICENCED",
+  "bugs": {
+    "url": "https://github.com/Codebrahma/edge-ide/issues"
+  },
+  "homepage": "https://github.com/Codebrahma/edge-ide#readme",
+  "devDependencies": {
+    "eslint": "^3.19.0"
+  }
+}

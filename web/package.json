@@ -69,7 +69,9 @@
   "scripts": {
     "watch": "./node_modules/.bin/gulp watch",
     "build": "./node_modules/.bin/gulp build",
-    "test": "jest"
+    "lint": "eslint ./*.js",
+    "lint:fix": "eslint ./*.js --fix",
+    "test": "npm run lint && jest"
   },
   "jest": {
     "verbose": true
