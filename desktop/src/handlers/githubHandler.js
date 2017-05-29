@@ -19,6 +19,8 @@ const {
   GITHUB_AUTH_REQUESTED,
 } = GithubConsts
 
+const COMPONENTS_REPOSITORY = 'https://raw.githubusercontent.com/Codebrahma/edge-meta/new-structure/index.json';
+
 const {
   MC_LIST_REQUEST,
   MC_INSTALL_COMPONENT
@@ -176,7 +178,7 @@ class GithubHandler {
       // Get the auth user
       // TODO Check if organization is codebrahma
       request
-        .get('https://raw.githubusercontent.com/Codebrahma/edge-meta/new-structure/index.json')
+        .get(COMPONENTS_REPOSITORY)
         .set('Authorization', `token ${token}`)
         .end((err, res) => {
           // Send event back to the render process
@@ -200,8 +202,8 @@ class GithubHandler {
   fetchComponentList(){
     try{
       request
-        // TODO change branch when merged with master      
-        .get(`https://raw.githubusercontent.com/Codebrahma/edge-meta/new-structure/index.json`) 
+        // TODO change branch when merged with master
+        .get(COMPONENTS_REPOSITORY)
         .set('Authorization', `token ${this.token}`)
         .end((err, res) => {
           if(err){
