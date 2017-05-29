@@ -176,7 +176,7 @@ class GithubHandler {
       // Get the auth user
       // TODO Check if organization is codebrahma
       request
-        .get('https://api.github.com/user')
+        .get('https://raw.githubusercontent.com/Codebrahma/edge-meta/new-structure/index.json')
         .set('Authorization', `token ${token}`)
         .end((err, res) => {
           // Send event back to the render process
