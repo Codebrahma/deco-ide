@@ -27,7 +27,7 @@ const {
 import { TEMP_PROJECT_FOLDER } from '../constants/DecoPaths'
 import { writeFile } from '../fs/safeWriter'
 
-
+// TODO: Move the secrets out
 const options = {
   root: 'https://api.github.com',
   client_id: '6d5bcbdda5b24161cfae',
